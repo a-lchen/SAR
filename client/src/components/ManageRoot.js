@@ -1,6 +1,8 @@
 import React from "react";
 import { getLocation } from "../utils.js"
 
+import AcUnitIcon from '@material-ui/icons/AcUnit';
+
 class ManageRoot extends React.Component {
 
   componentDidMount() {
@@ -14,6 +16,7 @@ class ManageRoot extends React.Component {
     return (
       <div>
         Manager!
+        <AcUnitIcon />
       </div>
     )
     ;
