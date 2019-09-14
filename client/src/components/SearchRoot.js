@@ -36,7 +36,7 @@ class SearchRoot extends React.Component {
       // Important! Always set the container height explicitly
       <div style={{ height: '100vh', width: '100%' }}>
         <GoogleMapReact
-          bootstrapURLKeys={{ key: '' }}
+          bootstrapURLKeys={{ key: process.env.MAPS_KEY }}
           defaultCenter={this.state.center}
           defaultZoom={this.state.zoom}
         >
