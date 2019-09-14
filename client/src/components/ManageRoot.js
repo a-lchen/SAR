@@ -1,4 +1,5 @@
 import React from "react";
+import { getLocation } from "../utils.js"
 
 class ManageRoot extends React.Component {
 
