@@ -29,20 +29,20 @@ const styles = {
 
 class SearchRoot extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       center: {
-      lat: 42.3583566,
-      lng: -71.101722
-    },
-    zoom: 17
-    }
+        lat: 42.3583566,
+        lng: -71.101722
+      },
+      zoom: 17
+    };
   }
 
   componentDidMount() {
-    let splitPath = window.location.pathname.split("/")
-    console.log(splitPath[splitPath.length - 1])
-    console.log(getLocation())
+    let splitPath = window.location.pathname.split("/");
+    console.log(splitPath[splitPath.length - 1]);
+    console.log(getLocation());
   }
 
   smsClicked() {
@@ -61,11 +61,10 @@ class SearchRoot extends React.Component {
     console.log('contact manager')
   }
 
-
   render() {
     return (
       // Important! Always set the container height explicitly
-      <div style={{ height: '100vh', width: '100%' }}>
+      <div style={{ height: "100vh", width: "100%" }}>
         <GoogleMapReact
           bootstrapURLKeys={{ key: process.env.MAPS_KEY }}
           defaultCenter={this.state.center}
@@ -75,7 +74,6 @@ class SearchRoot extends React.Component {
             lat={42.3583566}
             lng={-71.101722}
           />
-
         </GoogleMapReact>
 
         <div style={styles.iconContainer}>
