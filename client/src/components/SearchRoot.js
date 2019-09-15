@@ -75,7 +75,7 @@ class SearchRoot extends React.Component {
 
     socket.on("grid", data => {
       // TODO: DO STUFF WHEN YOU GET THE GRID HERE.
-      // console.log(data);
+      console.log(data);
     });
 
     socket.on("orders", data => {
@@ -102,7 +102,7 @@ class SearchRoot extends React.Component {
 
   contactClicked() {
     console.log("contact manager");
-    window.open("tel+5302200866", "_blank");
+    window.open("tel:+5302200866", "_blank");
   }
 
   sendClue(clue) {
