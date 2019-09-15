@@ -3,6 +3,7 @@ import Icon from '@material-ui/core/Icon';
 import GoogleMapReact from 'google-map-react';
 import SearcherMarker from './SearcherMarker.js'
 import {getLocation} from "../utils.js";
+import {sendLocation, sendFoundClue} from "../socket.js"
 
 const styles = {
   icon : {
