@@ -9,7 +9,13 @@ import UserDot from "./UserDot.js";
 import { getLocation } from "../utils.js";
 import { getLatLongBounds } from "./Helpers.js";
 
-import { socket, init, sendLocation, sendFoundClue } from "../socket.js";
+import {
+  socket,
+  init,
+  sendLocation,
+  sendFoundClue,
+  sendDirectSearcher
+} from "../socket.js";
 
 class ManageRoot extends React.Component {
   constructor(props) {
@@ -26,45 +32,64 @@ class ManageRoot extends React.Component {
       searchedBlocks: [],
       unsearchedBlocks: [],
       polylinesJSX: [],
+      gridData: {},
       snack: false,
       snackMessage: null,
       map: null
     };
   }
 
-  toggleSquare = bounds => {
-    let paths = [
-      { lat: bounds[0][0], lng: bounds[0][1] },
-      { lat: bounds[0][0], lng: bounds[1][1] },
-      { lat: bounds[1][0], lng: bounds[1][1] },
-      { lat: bounds[1][0], lng: bounds[0][1] }
-    ];
+  // "coords" meaning "coord string"
+  coordsToData = coords => {
+    let comma = coords.indexOf(",");
+    return {
+      lat: parseFloat(coords.substring(0, comma)),
+      lng: parseFloat(coords.substring(comma + 1))
+    };
+  };
 
-    // if we've already added this block before, don't add it again
-    for (var i = 0; i < this.state.allBlocks.length; i++) {
-      if (
-        paths[0].lat == this.state.allBlocks[i][0].lat &&
-        paths[0].lng == this.state.allBlocks[i][0].lng
-      ) {
-        return;
+  rerenderGrid = () => {
+    let eps = 0.00001;
+    let allBlocksUpdated = Array.from(this.state.allBlocks);
+
+    for (var coords in this.state.gridData) {
+      let data = this.coordsToData(coords);
+      let bounds = getLatLongBounds(data.lat + eps, data.lng + eps);
+      console.log(bounds);
+      let paths = [
+        { lat: bounds[0][0], lng: bounds[0][1] },
+        { lat: bounds[0][0], lng: bounds[1][1] },
+        { lat: bounds[1][0], lng: bounds[1][1] },
+        { lat: bounds[1][0], lng: bounds[0][1] }
+      ];
+
+      let color = this.state.gridData[coords] > 0 ? "#FF0000" : "#0000FF";
+
+      let flightPath = new google.maps.Polygon({
+        map: this.state.map,
+        paths: paths,
+        strokeColor: color,
+        strokeOpacity: 0.8,
+        strokeWeight: 0,
+        fillColor: color,
+        fillOpacity: 0.35,
+        draggable: false,
+        geodesic: true
+      });
+      flightPath.setMap(this.state.map);
+
+      // if we've already added this block before, don't add it again
+      for (var i = 0; i < this.state.allBlocks.length; i++) {
+        if (
+          paths[0].lat == this.state.allBlocks[i][0].lat &&
+          paths[0].lng == this.state.allBlocks[i][0].lng
+        ) {
+          return;
+        }
       }
+
+      allBlocksUpdated.push(paths);
     }
-
-    let flightPath = new google.maps.Polygon({
-      map: this.state.map,
-      paths: paths,
-      strokeColor: "#0000FF",
-      strokeOpacity: 0.8,
-      strokeWeight: 0,
-      fillColor: "#0000FF",
-      fillOpacity: 0.35,
-      draggable: false,
-      geodesic: true
-    });
-    flightPath.setMap(this.state.map);
-
-    var allBlocksUpdated = Array.from(this.state.allBlocks);
-    allBlocksUpdated.push(paths);
 
     this.setState({
       allBlocks: allBlocksUpdated
@@ -85,7 +110,12 @@ class ManageRoot extends React.Component {
       });
     } else {
       let bounds = getLatLongBounds(data.lat, data.lng);
-      this.toggleSquare(bounds);
+      let bottomLeft = bounds[0][0].toString() + "," + bounds[0][1].toString();
+      sendDirectSearcher(
+        bottomLeft,
+        this.state.currentUser.name,
+        this.state.searchID
+      );
     }
   };
 
@@ -114,12 +144,24 @@ class ManageRoot extends React.Component {
       // TODO: DO STUFF WHEN YOU GET THE GRID HERE.
       console.log("grid");
       console.log(data);
+      this.setState(
+        {
+          gridData: data
+        },
+        () => {
+          this.rerenderGrid();
+        }
+      );
     });
 
     socket.on("found_clue", data => {
       // TODO: DO STUFF WHEN CLUE HAS BEEN FOUND HERE.
       console.log("found clue");
       console.log(data);
+    });
+
+    this.setState({
+      searchID: search_id
     });
   }
 
