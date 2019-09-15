@@ -8,6 +8,7 @@ export const init = (user_id, search_id) => {
 
 // location: string in long,lat form. e.g. '42.3583277,71.10173499999999' location SHOULD NOT be discretized.
 export const sendLocation = (location, user_id, search_id) => {
+  console.log(location);
   socket.emit("location", {
     location: location,
     user_id: user_id,
@@ -16,6 +17,8 @@ export const sendLocation = (location, user_id, search_id) => {
 };
 
 export const sendFoundClue = (clue, user_id, search_id) => {
+  console.log("sending found clue");
+  console.log(clue);
   socket.emit("found_clue", {
     clue: clue,
     user_id: user_id,

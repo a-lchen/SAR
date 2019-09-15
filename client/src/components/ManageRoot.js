@@ -22,12 +22,60 @@ class ManageRoot extends React.Component {
       zoom: 17,
       users: [{ name: "abc", lat: 42.35, lng: -71.11 }],
       currentUser: null,
+      allBlocks: [],
       searchedBlocks: [],
       unsearchedBlocks: [],
+      polylinesJSX: [],
       snack: false,
-      snackMessage: null
+      snackMessage: null,
+      map: null
     };
   }
+
+  toggleSquare = bounds => {
+    let paths = [
+      { lat: bounds[0][0], lng: bounds[0][1] },
+      { lat: bounds[0][0], lng: bounds[1][1] },
+      { lat: bounds[1][0], lng: bounds[1][1] },
+      { lat: bounds[1][0], lng: bounds[0][1] }
+    ];
+
+    // if we've already added this block before, don't add it again
+    for (var i = 0; i < this.state.allBlocks.length; i++) {
+      if (
+        paths[0].lat == this.state.allBlocks[i][0].lat &&
+        paths[0].lng == this.state.allBlocks[i][0].lng
+      ) {
+        return;
+      }
+    }
+
+    let flightPath = new google.maps.Polygon({
+      map: this.state.map,
+      paths: paths,
+      strokeColor: "#0000FF",
+      strokeOpacity: 0.8,
+      strokeWeight: 0,
+      fillColor: "#0000FF",
+      fillOpacity: 0.35,
+      draggable: false,
+      geodesic: true
+    });
+    flightPath.setMap(this.state.map);
+
+    var allBlocksUpdated = Array.from(this.state.allBlocks);
+    allBlocksUpdated.push(paths);
+
+    this.setState({
+      allBlocks: allBlocksUpdated
+    });
+  };
+
+  onMapLoaded = (map, maps) => {
+    this.setState({
+      map: map
+    });
+  };
 
   onMapClick = data => {
     if (!this.state.currentUser) {
@@ -35,11 +83,17 @@ class ManageRoot extends React.Component {
         snack: true,
         snackMessage: "Please select a user first!"
       });
+    } else {
+      let bounds = getLatLongBounds(data.lat, data.lng);
+      this.toggleSquare(bounds);
     }
   };
 
   onMapChildClick = (key, childProps) => {
     console.log(childProps);
+    this.setState({
+      currentUser: childProps.name
+    });
   };
 
   hideSnack = () => {
@@ -70,7 +124,7 @@ class ManageRoot extends React.Component {
   }
 
   render() {
-    var userDots = this.state.users.map(user => {
+    let userDots = this.state.users.map(user => {
       return <UserDot name={user.name} lat={user.lat} lng={user.lng} />;
     });
 
@@ -83,6 +137,8 @@ class ManageRoot extends React.Component {
           defaultZoom={this.state.zoom}
           onClick={this.onMapClick}
           onChildClick={this.onMapChildClick}
+          onGoogleApiLoaded={({ map, maps }) => this.onMapLoaded(map, maps)}
+          yesIWantToUseGoogleMapApiInternals={true}
         >
           {userDots}
         </GoogleMapReact>
