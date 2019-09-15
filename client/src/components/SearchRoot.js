@@ -102,6 +102,7 @@ class SearchRoot extends React.Component {
 
   contactClicked() {
     console.log("contact manager");
+    window.open("tel+5302200866", "_blank");
   }
 
   sendClue(clue) {
