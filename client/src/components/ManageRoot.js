@@ -9,6 +9,8 @@ import UserDot from "./UserDot.js";
 import { getLocation } from "../utils.js";
 import { getLatLongBounds } from "./Helpers.js";
 
+import { socket, init, sendLocation, sendFoundClue } from "../socket.js";
+
 class ManageRoot extends React.Component {
   constructor(props) {
     super(props);
@@ -49,8 +51,22 @@ class ManageRoot extends React.Component {
 
   componentDidMount() {
     let splitPath = window.location.pathname.split("/");
-    console.log(splitPath[splitPath.length - 1]);
+    let search_id = splitPath[splitPath.length - 1];
     console.log(getLocation());
+
+    init("foo", search_id);
+    // sendLocation('42.3583277,71.10173499999999', 'foo', search_id)
+    socket.on("grid", data => {
+      // TODO: DO STUFF WHEN YOU GET THE GRID HERE.
+      console.log("grid");
+      console.log(data);
+    });
+
+    socket.on("found_clue", data => {
+      // TODO: DO STUFF WHEN CLUE HAS BEEN FOUND HERE.
+      console.log("found clue");
+      console.log(data);
+    });
   }
 
   render() {

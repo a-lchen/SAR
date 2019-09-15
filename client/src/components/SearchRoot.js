@@ -1,32 +1,32 @@
 import React from "react";
-import Icon from '@material-ui/core/Icon';
-import GoogleMapReact from 'google-map-react';
-import SearcherMarker from './SearcherMarker.js'
-import {getLocation} from "../utils.js";
-import {sendLocation, sendFoundClue} from "../socket.js"
+import Icon from "@material-ui/core/Icon";
+import GoogleMapReact from "google-map-react";
+import SearcherMarker from "./SearcherMarker.js";
+import { getLocation } from "../utils.js";
+import { socket, init, sendLocation, sendFoundClue } from "../socket.js";
 
 const styles = {
-  icon : {
+  icon: {
     fontSize: 100,
     //margin: 40,
-    color: 'white',
+    color: "white"
   },
   iconContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 80,
     left: 80,
     right: 80,
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    marginLeft: "auto",
+    marginRight: "auto"
   },
   button: {
     height: 160,
     width: 160,
     margin: 20,
     borderRadius: 320, //twice height/width
-    backgroundColor:'rgb(195, 125, 198)', //TODO: change to theme color
+    backgroundColor: "rgb(195, 125, 198)" //TODO: change to theme color
   }
-}
+};
 
 class SearchRoot extends React.Component {
   constructor(props) {
@@ -42,24 +42,36 @@ class SearchRoot extends React.Component {
 
   componentDidMount() {
     let splitPath = window.location.pathname.split("/");
-    console.log(splitPath[splitPath.length - 1]);
+    let search_id = splitPath[splitPath.length - 1];
     console.log(getLocation());
+    init("foo", search_id);
+    sendLocation("42.3583277,71.10173499999999", "foo", search_id);
+    socket.on("grid", data => {
+      // TODO: DO STUFF WHEN YOU GET THE GRID HERE.
+      console.log(data);
+    });
+
+    socket.on("orders", data => {
+      // TODO: DO STUFF WHEN RECEIVING ORDERS HERE.
+      console.log("got some orders");
+      console.log(data);
+    });
   }
 
   smsClicked() {
-    console.log('view messages')
+    console.log("view messages");
   }
 
   infoClicked() {
-    console.log('show info page')
+    console.log("show info page");
   }
 
   clueClicked() {
-    console.log('show clue popup')
+    console.log("show clue popup");
   }
 
   contactClicked() {
-    console.log('contact manager')
+    console.log("contact manager");
   }
 
   render() {
@@ -71,10 +83,7 @@ class SearchRoot extends React.Component {
           defaultCenter={this.state.center}
           defaultZoom={this.state.zoom}
         >
-          <SearcherMarker
-            lat={42.3583566}
-            lng={-71.101722}
-          />
+          <SearcherMarker lat={42.3583566} lng={-71.101722} />
         </GoogleMapReact>
 
         <div style={styles.iconContainer}>
@@ -91,11 +100,9 @@ class SearchRoot extends React.Component {
             <Icon style={styles.icon}> phone </Icon>
           </button>
         </div>
-
       </div>
     );
   }
 }
-
 
 export default SearchRoot;
