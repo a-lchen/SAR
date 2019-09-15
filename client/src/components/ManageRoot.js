@@ -55,13 +55,26 @@ class ManageRoot extends React.Component {
     for (var coords in this.state.gridData) {
       let data = this.coordsToData(coords);
       let bounds = getLatLongBounds(data.lat + eps, data.lng + eps);
-      console.log(bounds);
+
       let paths = [
         { lat: bounds[0][0], lng: bounds[0][1] },
         { lat: bounds[0][0], lng: bounds[1][1] },
         { lat: bounds[1][0], lng: bounds[1][1] },
         { lat: bounds[1][0], lng: bounds[0][1] }
       ];
+
+      let gotoNextCoord = false;
+      // if we've already added this block before, don't add it again
+      for (var i = 0; i < this.state.allBlocks.length; i++) {
+        if (
+          paths[0].lat == this.state.allBlocks[i][0].lat &&
+          paths[0].lng == this.state.allBlocks[i][0].lng
+        ) {
+          gotoNextCoord = true;
+          break;
+        }
+      }
+      if (gotoNextCoord) continue;
 
       let color = this.state.gridData[coords] > 0 ? "#FF0000" : "#0000FF";
 
@@ -77,16 +90,6 @@ class ManageRoot extends React.Component {
         geodesic: true
       });
       flightPath.setMap(this.state.map);
-
-      // if we've already added this block before, don't add it again
-      for (var i = 0; i < this.state.allBlocks.length; i++) {
-        if (
-          paths[0].lat == this.state.allBlocks[i][0].lat &&
-          paths[0].lng == this.state.allBlocks[i][0].lng
-        ) {
-          return;
-        }
-      }
 
       allBlocksUpdated.push(paths);
     }
