@@ -2,7 +2,8 @@ import React from "react";
 import Icon from "@material-ui/core/Icon";
 import GoogleMapReact from "google-map-react";
 import SearcherMarker from "./SearcherMarker.js";
-import { getLocation } from "../utils.js";
+import ClueModal from "./ClueModal.js";
+import { locationToString, getLocation } from "../utils.js";
 import { socket, init, sendLocation, sendFoundClue } from "../socket.js";
 
 const styles = {
@@ -32,12 +33,19 @@ class SearchRoot extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      location: {
+        lat: 42.3583566,
+        long: -71.101722
+      },
+      clueModalOpen: false,
       center: {
         lat: 42.3583566,
         lng: -71.101722
       },
       zoom: 17
     };
+    let splitPath = window.location.pathname.split("/");
+    this.search_id = splitPath[splitPath.length - 1];
   }
 
   componentDidMount() {
@@ -45,10 +53,29 @@ class SearchRoot extends React.Component {
     let search_id = splitPath[splitPath.length - 1];
     console.log(getLocation());
     init("foo", search_id);
-    sendLocation("42.3583277,71.10173499999999", "foo", search_id);
+    // sendLocation("42.3583277,71.10173499999999", "foo", search_id);
+
+    var tid = setTimeout(sendNewLoc, 200);
+    function sendNewLoc() {
+      // for (var search_id in searches) {
+      //   var search = searches[search_id];
+      //   // console.log("sending out locs")
+      //   io.in(search_id).emit("grid", search.coverage);
+      // }
+      tid = setTimeout(sendNewLoc, 200); // repeat myself
+      getLocation().then(res => {
+        sendLocation(
+          locationToString(res.coords.latitude, res.coords.longitude),
+          "foo",
+          search_id
+        );
+        // console.log(res)
+      });
+    }
+
     socket.on("grid", data => {
       // TODO: DO STUFF WHEN YOU GET THE GRID HERE.
-      console.log(data);
+      // console.log(data);
     });
 
     socket.on("orders", data => {
@@ -68,10 +95,30 @@ class SearchRoot extends React.Component {
 
   clueClicked() {
     console.log("show clue popup");
+    this.setState({
+      clueModalOpen: true
+    });
   }
 
   contactClicked() {
     console.log("contact manager");
+  }
+
+  sendClue(clue) {
+    console.log(clue);
+    sendFoundClue(
+      {
+        image: null,
+        location: locationToString(
+          this.state.location.lat,
+          this.state.location.long
+        ),
+        text: clue,
+        time: Date.now()
+      },
+      "foo",
+      this.search_id
+    );
   }
 
   render() {
@@ -85,6 +132,15 @@ class SearchRoot extends React.Component {
         >
           <SearcherMarker lat={42.3583566} lng={-71.101722} />
         </GoogleMapReact>
+        <ClueModal
+          onSendClue={clue => {
+            this.sendClue(clue);
+          }}
+          clueOpen={this.state.clueModalOpen}
+          onClueCancel={() => {
+            this.setState({ clueModalOpen: false });
+          }}
+        />
 
         <div style={styles.iconContainer}>
           <button style={styles.button} onClick={() => this.smsClicked()}>
