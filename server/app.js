@@ -70,6 +70,7 @@ function sendGrid() {
   for (var search_id in searches) {
     var search = searches[search_id];
     // console.log("sending out locs")
+    console.log(search.coverage);
     io.in(search_id).emit("grid", search.coverage);
   }
   tid = setTimeout(sendGrid, 200); // repeat myself
