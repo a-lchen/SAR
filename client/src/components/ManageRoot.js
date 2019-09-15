@@ -32,6 +32,45 @@ class ManageRoot extends React.Component {
     };
   }
 
+  toggleSquare = bounds => {
+    let paths = [
+      { lat: bounds[0][0], lng: bounds[0][1] },
+      { lat: bounds[0][0], lng: bounds[1][1] },
+      { lat: bounds[1][0], lng: bounds[1][1] },
+      { lat: bounds[1][0], lng: bounds[0][1] }
+    ];
+
+    // if we've already added this block before, don't add it again
+    for (var i = 0; i < this.state.allBlocks.length; i++) {
+      if (
+        paths[0].lat == this.state.allBlocks[i][0].lat &&
+        paths[0].lng == this.state.allBlocks[i][0].lng
+      ) {
+        return;
+      }
+    }
+
+    let flightPath = new google.maps.Polygon({
+      map: this.state.map,
+      paths: paths,
+      strokeColor: "#0000FF",
+      strokeOpacity: 0.8,
+      strokeWeight: 0,
+      fillColor: "#0000FF",
+      fillOpacity: 0.35,
+      draggable: false,
+      geodesic: true
+    });
+    flightPath.setMap(this.state.map);
+
+    var allBlocksUpdated = Array.from(this.state.allBlocks);
+    allBlocksUpdated.push(paths);
+
+    this.setState({
+      allBlocks: allBlocksUpdated
+    });
+  };
+
   onMapLoaded = (map, maps) => {
     this.setState({
       map: map
@@ -45,24 +84,8 @@ class ManageRoot extends React.Component {
         snackMessage: "Please select a user first!"
       });
     } else {
-      console.log(data);
       let bounds = getLatLongBounds(data.lat, data.lng);
-      let flightPath = new google.maps.Polygon({
-        map: this.state.map,
-        paths: [
-          { lat: 42.352, lng: -71.11 },
-          { lat: 42.352, lng: -71.12 },
-          { lat: 42.362, lng: -71.12 }
-        ],
-        strokeColor: "#FF0000",
-        strokeOpacity: 0.8,
-        strokeWeight: 0,
-        fillColor: "#FF0000",
-        fillOpacity: 0.35,
-        draggable: false,
-        geodesic: true
-      });
-      flightPath.setMap(this.state.map);
+      this.toggleSquare(bounds);
     }
   };
 
