@@ -1,8 +1,12 @@
 import React from "react";
 import GoogleMapReact from "google-map-react";
+import AcUnitIcon from "@material-ui/icons/AcUnit";
+import { Snackbar } from "@material-ui/core";
+
+import SearchData from "./SearchData.js";
+
 import { getLocation } from "../utils.js";
 import { getLatLongBounds } from "./Helpers.js";
-import AcUnitIcon from "@material-ui/icons/AcUnit";
 
 class ManageRoot extends React.Component {
   constructor(props) {
@@ -12,13 +16,33 @@ class ManageRoot extends React.Component {
         lat: 42.3583566,
         lng: -71.101722
       },
-      zoom: 17
+      zoom: 17,
+      users: [{ name: "abc", location: [42.35, -71.11] }],
+      currentUser: null,
+      searchedBlocks: [],
+      unsearchedBlocks: [],
+      snack: false,
+      snackMessage: null
     };
   }
 
-  onClick(data) {
-    console.log(data);
-  }
+  onMapClick = data => {
+    if (!this.state.currentUser) {
+      this.setState({
+        snack: true,
+        snackMessage: "Please select a user first!"
+      });
+    }
+  };
+
+  onMapChildClick = (key, childProps) => {};
+
+  hideSnack = () => {
+    console.log("HI");
+    this.setState({
+      snack: false
+    });
+  };
 
   componentDidMount() {
     let splitPath = window.location.pathname.split("/");
@@ -27,6 +51,8 @@ class ManageRoot extends React.Component {
   }
 
   render() {
+    var userDots = this.state.users.map(user => {});
+
     return (
       // Important! Always set the container height explicitly
       <div style={{ height: "100vh", width: "100%" }}>
@@ -34,8 +60,17 @@ class ManageRoot extends React.Component {
           bootstrapURLKeys={{ key: process.env.MAPS_KEY }}
           defaultCenter={this.state.center}
           defaultZoom={this.state.zoom}
-          onClick={this.onClick}
+          onClick={this.onMapClick}
+          onChildClick={this.onMapChildClick}
         ></GoogleMapReact>
+        <Snackbar
+          open={this.state.snack}
+          message={this.state.snackMessage || ""}
+          autoHideDuration={4000}
+          onClose={this.hideSnack}
+          action=""
+          resumeHideDuration={0}
+        />
       </div>
     );
   }
