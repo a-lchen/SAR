@@ -4,7 +4,9 @@ import Badge from "@material-ui/core/Badge";
 import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 import GoogleMapReact from "google-map-react";
 import SearcherMarker from "./SearcherMarker.js";
+import CardMedia from "@material-ui/core/CardMedia";
 import ClueModal from "./ClueModal.js";
+import InfoModal from "./InfoModal.js";
 import { locationToString, getLocation } from "../utils.js";
 import { socket, init, sendLocation, sendFoundClue } from "../socket.js";
 
@@ -46,6 +48,10 @@ const styles = {
     width: 160,
     margin: 30,
     borderRadius: 320, // > twice height/width
+    backgroundColor: "primary"
+  },
+  infoModal: {
+    fontSize: 200,
     backgroundColor: primary
   }
 };
@@ -61,13 +67,13 @@ class SearchRoot extends React.Component {
         lat: 42.3583566,
         long: -71.101722
       },
+      infoModalOpen: false,
       clueModalOpen: false,
       center: {
         lat: 42.3583566,
         lng: -71.101722
       },
-      zoom: 17,
-      makeClue: false
+      zoom: 17
       // grid:
       // more attributes here
     };
@@ -120,6 +126,9 @@ class SearchRoot extends React.Component {
 
   infoClicked() {
     console.log("show info page");
+    this.setState({
+      infoModalOpen: true
+    });
   }
 
   clueClicked() {
@@ -153,7 +162,7 @@ class SearchRoot extends React.Component {
   render() {
     return (
       // Important! Always set the container height explicitly
-      <div style={{ height: "100vh", width: "100%" }}>
+      <div theme={theme} style={{ height: "100vh", width: "100%" }}>
         <GoogleMapReact
           bootstrapURLKeys={{ key: process.env.MAPS_KEY }}
           defaultCenter={this.state.center}
@@ -165,6 +174,15 @@ class SearchRoot extends React.Component {
         >
           <SearcherMarker lat={42.3583566} lng={-71.101722} />
         </GoogleMapReact>
+
+        <InfoModal
+          style={styles.infoModal}
+          infoOpen={this.state.infoModalOpen}
+          onInfoClose={() => {
+            this.setState({ infoModalOpen: false });
+          }}
+        />
+
         <ClueModal
           onSendClue={clue => {
             this.sendClue(clue);
@@ -174,8 +192,6 @@ class SearchRoot extends React.Component {
             this.setState({ clueModalOpen: false });
           }}
         />
-
-        {this.state.makeClue && <Clue />}
 
         <div style={styles.iconContainer}>
           <button style={styles.button} onClick={() => this.smsClicked()}>
