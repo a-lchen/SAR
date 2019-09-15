@@ -22,12 +22,21 @@ class ManageRoot extends React.Component {
       zoom: 17,
       users: [{ name: "abc", lat: 42.35, lng: -71.11 }],
       currentUser: null,
+      allBlocks: [],
       searchedBlocks: [],
       unsearchedBlocks: [],
+      polylinesJSX: [],
       snack: false,
-      snackMessage: null
+      snackMessage: null,
+      map: null
     };
   }
+
+  onMapLoaded = (map, maps) => {
+    this.setState({
+      map: map
+    });
+  };
 
   onMapClick = data => {
     if (!this.state.currentUser) {
@@ -35,11 +44,33 @@ class ManageRoot extends React.Component {
         snack: true,
         snackMessage: "Please select a user first!"
       });
+    } else {
+      console.log(data);
+      let bounds = getLatLongBounds(data.lat, data.lng);
+      let flightPath = new google.maps.Polygon({
+        map: this.state.map,
+        paths: [
+          { lat: 42.352, lng: -71.11 },
+          { lat: 42.352, lng: -71.12 },
+          { lat: 42.362, lng: -71.12 }
+        ],
+        strokeColor: "#FF0000",
+        strokeOpacity: 0.8,
+        strokeWeight: 0,
+        fillColor: "#FF0000",
+        fillOpacity: 0.35,
+        draggable: false,
+        geodesic: true
+      });
+      flightPath.setMap(this.state.map);
     }
   };
 
   onMapChildClick = (key, childProps) => {
     console.log(childProps);
+    this.setState({
+      currentUser: childProps.name
+    });
   };
 
   hideSnack = () => {
@@ -70,7 +101,7 @@ class ManageRoot extends React.Component {
   }
 
   render() {
-    var userDots = this.state.users.map(user => {
+    let userDots = this.state.users.map(user => {
       return <UserDot name={user.name} lat={user.lat} lng={user.lng} />;
     });
 
@@ -83,6 +114,8 @@ class ManageRoot extends React.Component {
           defaultZoom={this.state.zoom}
           onClick={this.onMapClick}
           onChildClick={this.onMapChildClick}
+          onGoogleApiLoaded={({ map, maps }) => this.onMapLoaded(map, maps)}
+          yesIWantToUseGoogleMapApiInternals={true}
         >
           {userDots}
         </GoogleMapReact>
