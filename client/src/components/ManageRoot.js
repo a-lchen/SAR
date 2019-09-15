@@ -4,6 +4,7 @@ import AcUnitIcon from "@material-ui/icons/AcUnit";
 import { Snackbar } from "@material-ui/core";
 
 import SearchData from "./SearchData.js";
+import UserDot from "./UserDot.js";
 
 import { getLocation } from "../utils.js";
 import { getLatLongBounds } from "./Helpers.js";
@@ -17,7 +18,7 @@ class ManageRoot extends React.Component {
         lng: -71.101722
       },
       zoom: 17,
-      users: [{ name: "abc", location: [42.35, -71.11] }],
+      users: [{ name: "abc", lat: 42.35, lng: -71.11 }],
       currentUser: null,
       searchedBlocks: [],
       unsearchedBlocks: [],
@@ -35,7 +36,9 @@ class ManageRoot extends React.Component {
     }
   };
 
-  onMapChildClick = (key, childProps) => {};
+  onMapChildClick = (key, childProps) => {
+    console.log(childProps);
+  };
 
   hideSnack = () => {
     console.log("HI");
@@ -51,7 +54,9 @@ class ManageRoot extends React.Component {
   }
 
   render() {
-    var userDots = this.state.users.map(user => {});
+    var userDots = this.state.users.map(user => {
+      return <UserDot name={user.name} lat={user.lat} lng={user.lng} />;
+    });
 
     return (
       // Important! Always set the container height explicitly
@@ -62,7 +67,9 @@ class ManageRoot extends React.Component {
           defaultZoom={this.state.zoom}
           onClick={this.onMapClick}
           onChildClick={this.onMapChildClick}
-        ></GoogleMapReact>
+        >
+          {userDots}
+        </GoogleMapReact>
         <Snackbar
           open={this.state.snack}
           message={this.state.snackMessage || ""}
